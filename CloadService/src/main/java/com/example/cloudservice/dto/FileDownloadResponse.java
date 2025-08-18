@@ -1,4 +1,4 @@
-package com.example.cloadservice.dto;
+package com.example.cloudservice.dto;
 
 
 import lombok.Builder;

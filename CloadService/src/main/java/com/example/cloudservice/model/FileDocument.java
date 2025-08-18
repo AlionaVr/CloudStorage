@@ -1,4 +1,4 @@
-package com.example.cloadservice.model;
+package com.example.cloudservice.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
