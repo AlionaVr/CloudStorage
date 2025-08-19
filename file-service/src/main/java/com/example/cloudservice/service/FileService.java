@@ -44,7 +44,6 @@ public class FileService {
                 .fileName(fileName)
                 .contentType(file.getContentType())
                 .size(file.getSize())
-                .ownerName(userName)
                 .uploadDate(LocalDateTime.now())
                 .fileData(file.getBytes())
                 .build();
@@ -76,10 +75,6 @@ public class FileService {
         FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, oldName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + oldName));
 
-        if (newName == null || newName.trim().isEmpty()) {
-            throw new IllegalArgumentException("New file name cannot be empty");
-        }
-
         if (fileRepository.findByOwnerNameAndFileName(userName, newName).isPresent()) {
             throw new IllegalArgumentException("File with name '" + newName + "' already exists");
         }
@@ -95,14 +90,9 @@ public class FileService {
             return Collections.emptyList();
         }
 
-        List<FileDocument> sortedFiles = List.of();
-        if (limit != null && limit > 0) {
-            sortedFiles = files.stream()
-                    .sorted((f1, f2) -> f2.getUploadDate().compareTo(f1.getUploadDate()))
-                    .limit(limit)
-                    .toList();
-        }
-        return sortedFiles.stream()
+        return files.stream()
+                .sorted((f1, f2) -> f2.getUploadDate().compareTo(f1.getUploadDate()))
+                .limit(limit != null && limit > 0 ? limit : files.size())
                 .map(doc -> FileListResponse.builder()
                         .filename(doc.getFileName())
                         .size(doc.getSize())
@@ -111,7 +101,5 @@ public class FileService {
                         .build())
                 .toList();
     }
-
-
 }
 

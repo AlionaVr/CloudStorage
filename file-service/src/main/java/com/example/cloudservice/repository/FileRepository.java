@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FileRepository extends MongoRepository<FileDocument, Long> {
+public interface FileRepository extends MongoRepository<FileDocument, String> {
     List<FileDocument> findByOwnerName(String username);
 
     Optional<FileDocument> findByOwnerNameAndFileName(String username, String fileName);

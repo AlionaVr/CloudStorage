@@ -18,16 +18,15 @@ import java.time.LocalDateTime;
 @Builder
 public class FileDocument {
     @Id
-    private long id;
-
-    private String fileName;
-    private String contentType;
-    private long size;
-    private byte[] fileData;
-
+    private String id;
     @Indexed
     private String ownerName;
     @Indexed
     private LocalDateTime uploadDate;
 
+    private String fileName;
+    private String contentType;
+    private long size;
+
+    private byte[] fileData;
 }
