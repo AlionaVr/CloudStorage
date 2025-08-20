@@ -6,7 +6,7 @@
         <groupId>com.example</groupId>
         <artifactId>CloudStorageDiploma</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>file-service</artifactId>

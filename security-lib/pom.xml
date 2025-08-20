@@ -7,11 +7,11 @@
         <groupId>com.example</groupId>
         <artifactId>CloudStorageDiploma</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>security-lib</artifactId>
-    <name>security-starter</name>
+    <name>security-lib</name>
     <description>JWT Security Starter for Cloud Storage</description>
 
     <dependencies>
@@ -45,4 +45,5 @@
             <artifactId>tomcat-embed-core</artifactId>
         </dependency>
     </dependencies>
+
 </project>

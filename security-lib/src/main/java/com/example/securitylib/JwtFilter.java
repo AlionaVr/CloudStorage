@@ -5,7 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,11 +19,17 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    @Value("${security.jwt.header}")
+    private String header;
 
     private final JwtService jwt;
-    private final JwtProperties props;
+
+    public JwtFilter(JwtService jwt) {
+        this.jwt = jwt;
+        System.out.println("✅ JwtFilter initialized");
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -60,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest req) {
-        String t = req.getHeader(props.getHeader()); // "auth-token"
+        String t = req.getHeader(header); // "auth-token"
         if (StringUtils.hasText(t)) return t;
         String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) return auth.substring(7);
