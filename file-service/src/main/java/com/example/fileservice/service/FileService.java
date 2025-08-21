@@ -1,10 +1,10 @@
-package com.example.cloudservice.service;
+package com.example.fileservice.service;
 
-import com.example.cloudservice.dto.FileDownloadResponse;
-import com.example.cloudservice.dto.FileListResponse;
-import com.example.cloudservice.exception.FileNotFoundException;
-import com.example.cloudservice.model.FileDocument;
-import com.example.cloudservice.repository.FileRepository;
+import com.example.fileservice.dto.FileDownloadResponse;
+import com.example.fileservice.dto.FileListResponse;
+import com.example.fileservice.exception.FileNotFoundException;
+import com.example.fileservice.model.FileDocument;
+import com.example.fileservice.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FileService {
 
-    @Value("${app.upload.max-size-bytes}")
+    @Value("${spring.servlet.multipart.max-file-size}")
     private long MAX_FILE_SIZE; //10MB
 
     private final FileRepository fileRepository;
@@ -51,7 +51,7 @@ public class FileService {
         fileRepository.save(doc);
     }
 
-    public void deleteFile(String userName, String fileName) throws IOException {
+    public void deleteFile(String userName, String fileName) {
         FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, fileName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + fileName));
 
@@ -71,7 +71,7 @@ public class FileService {
                 .build();
     }
 
-    public void renameFile(String userName, String oldName, String newName) throws IOException {
+    public void renameFile(String userName, String oldName, String newName) {
         FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, oldName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + oldName));
 

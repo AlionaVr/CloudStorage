@@ -11,19 +11,64 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  cloud-service:
-    build: .
-    container_name: cloud-service
-    restart: always
-    ports:
-      - "8080:8080"
+  postgres:
+    image: postgres:15
+    container_name: authdb
     environment:
-      SPRING_APPLICATION_NAME: CloudService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      timeout: 5s
+      interval: 5s
+      retries: 5
+
+  file-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: file-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_APPLICATION_NAME: FileService
       SPRING_DATA_MONGODB_URI: mongodb://admin:secret@mongo:27017/cloudservice?authSource=admin
-      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10MB
-      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10MB
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10485760
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10485760
+      SECURITY_JWT_SECRET: bXktc3VwZXItc2VjcmV0LWtleQ==  # base64 encoded
+      SECURITY_JWT_ISSUER: cloud-storage-diploma
+      SECURITY_JWT_ACCESS_TTL_MINUTES: 30
+      SECURITY_JWT_HEADER: auth-token
     depends_on:
       - mongo
 
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_APPLICATION_NAME: AuthService
+      SPRING_DATASOURCE_URL: jdbc:postgresql://authdb:5432/authdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      SECURITY_JWT_SECRET: bXktc3VwZXItc2VjcmV0LWtleQ==  # base64 encoded
+      SECURITY_JWT_ISSUER: cloud-storage-diploma
+      SECURITY_JWT_ACCESS_TTL_MINUTES: 30
+      SECURITY_JWT_HEADER: auth-token
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   mongo_data:
+  auth_db_data:

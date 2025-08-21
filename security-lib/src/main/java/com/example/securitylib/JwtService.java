@@ -7,7 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
@@ -15,7 +15,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class JwtService {
 
@@ -30,9 +30,18 @@ public class JwtService {
 
     private final static int SECONDS_IN_MINUTE = 60;
 
+    private SecretKey cachedKey;
+
     private SecretKey key() {
-        byte[] bytes = Base64.getDecoder().decode(secret);
-        return Keys.hmacShaKeyFor(bytes);
+        if (cachedKey == null) {
+            try {
+                byte[] bytes = Base64.getDecoder().decode(secret);
+                cachedKey = Keys.hmacShaKeyFor(bytes);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Invalid JWT secret key format. Must be base64 encoded.", e);
+            }
+        }
+        return cachedKey;
     }
 
     public String generateAccessToken(String username, List<String> roles) {

@@ -1,9 +1,9 @@
-package com.example.cloudservice.controller;
+package com.example.fileservice.controller;
 
-import com.example.cloudservice.dto.FileDownloadResponse;
-import com.example.cloudservice.dto.FileListResponse;
-import com.example.cloudservice.dto.request.RenameFileRequest;
-import com.example.cloudservice.service.FileService;
+import com.example.fileservice.dto.FileDownloadResponse;
+import com.example.fileservice.dto.FileListResponse;
+import com.example.fileservice.dto.request.RenameFileRequest;
+import com.example.fileservice.service.FileService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

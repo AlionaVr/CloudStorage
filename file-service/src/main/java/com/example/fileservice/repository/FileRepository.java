@@ -1,6 +1,6 @@
-package com.example.cloudservice.repository;
+package com.example.fileservice.repository;
 
-import com.example.cloudservice.model.FileDocument;
+import com.example.fileservice.model.FileDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

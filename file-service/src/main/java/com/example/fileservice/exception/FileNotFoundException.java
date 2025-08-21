@@ -1,4 +1,4 @@
-package com.example.cloudservice.exception;
+package com.example.fileservice.exception;
 
 public class FileNotFoundException extends RuntimeException {
     public FileNotFoundException(String message) {

@@ -1,6 +1,6 @@
-package com.example.cloudservice.exception;
+package com.example.fileservice.exception;
 
-import com.example.cloudservice.dto.ErrorResponse;
+import com.example.fileservice.dto.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

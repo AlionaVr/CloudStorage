@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,24 +20,20 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
-public class JwtFilter extends OncePerRequestFilter {
+@RequiredArgsConstructor
+public class MyJwtFilter extends OncePerRequestFilter {
     @Value("${security.jwt.header}")
     private String header;
 
     private final JwtService jwt;
-
-    public JwtFilter(JwtService jwt) {
-        this.jwt = jwt;
-        System.out.println("✅ JwtFilter initialized");
-    }
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        if (path.equals("/cloud/login") || path.equals("/cloud/logout")) {
+
+        if (isPublicEndpoint(path)) {
             chain.doFilter(request, response);
             return;
         }
@@ -66,10 +63,20 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest req) {
-        String t = req.getHeader(header); // "auth-token"
-        if (StringUtils.hasText(t)) return t;
-        String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
-        if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) return auth.substring(7);
+        String token = req.getHeader(header);// "auth-token"
+        if (StringUtils.hasText(token))
+            return token;
+
+        String authHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+            String bearerToken = authHeader.substring(7);
+            return StringUtils.hasText(bearerToken) ? bearerToken : null;
+        }
         return null;
+    }
+
+    private boolean isPublicEndpoint(String path) {
+        return path.equals("/cloud/login") ||
+                path.equals("/cloud/logout");
     }
 }

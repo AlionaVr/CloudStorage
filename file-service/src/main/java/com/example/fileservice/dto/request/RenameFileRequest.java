@@ -1,4 +1,4 @@
-package com.example.cloudservice.dto.request;
+package com.example.fileservice.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
