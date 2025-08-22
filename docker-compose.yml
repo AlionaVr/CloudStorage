@@ -34,13 +34,13 @@ services:
       dockerfile: Dockerfile
       target: file-service
     ports:
-      - "8082:8082"
+      - "8080:8080"
     environment:
       SPRING_APPLICATION_NAME: FileService
       SPRING_DATA_MONGODB_URI: mongodb://admin:secret@mongo:27017/cloudservice?authSource=admin
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10485760
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10485760
-      SECURITY_JWT_SECRET: bXktc3VwZXItc2VjcmV0LWtleQ==  # base64 encoded
+      SECURITY_JWT_SECRET: vdeNR3G2uMdCQD3vY3O1Z7vjBoBN4Uv3UwGM+2P3kZQ=  # base64 encoded
       SECURITY_JWT_ISSUER: cloud-storage-diploma
       SECURITY_JWT_ACCESS_TTL_MINUTES: 30
       SECURITY_JWT_HEADER: auth-token
@@ -62,7 +62,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: true
       SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
-      SECURITY_JWT_SECRET: bXktc3VwZXItc2VjcmV0LWtleQ==  # base64 encoded
+      SECURITY_JWT_SECRET: vdeNR3G2uMdCQD3vY3O1Z7vjBoBN4Uv3UwGM+2P3kZQ=   # base64 encoded
       SECURITY_JWT_ISSUER: cloud-storage-diploma
       SECURITY_JWT_ACCESS_TTL_MINUTES: 30
       SECURITY_JWT_HEADER: auth-token

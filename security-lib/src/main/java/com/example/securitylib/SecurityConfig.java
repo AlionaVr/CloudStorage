@@ -29,7 +29,7 @@ public class SecurityConfig {
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/cloud/login", "/cloud/logout").permitAll()
+                .requestMatchers("/cloud/login", "/cloud/logout", "/cloud/register").permitAll()
                 .anyRequest().authenticated()
         );
 

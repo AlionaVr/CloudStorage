@@ -31,25 +31,22 @@ public class FileController {
     public ResponseEntity<?> uploadFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                         @RequestParam("filename") @NotBlank(message = "filename is required") String filename,
                                         @RequestPart("file") MultipartFile file) throws IOException {
-        String username = extractUsernameFromToken(token);
-        fileService.uploadFile(username, filename, file);
+        fileService.uploadFile(token, filename, file);
         return ResponseEntity.ok(Map.of("message", "File uploaded successfully"));
     }
 
     @DeleteMapping("/file")
     public ResponseEntity<?> deleteFile(
             @RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
-            @RequestParam("filename") @NotBlank(message = "filename is required") String filename) throws IOException {
-        String username = extractUsernameFromToken(token);
-        fileService.deleteFile(username, filename);
+            @RequestParam("filename") @NotBlank(message = "filename is required") String filename) {
+        fileService.deleteFile(token, filename);
         return ResponseEntity.ok(Map.of("message", "File deleted successfully"));
     }
 
     @GetMapping("/file")
     public ResponseEntity<?> downloadFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                           @RequestParam("filename") @NotBlank(message = "filename is required") String filename) throws IOException {
-        String username = extractUsernameFromToken(token);
-        FileDownloadResponse resp = fileService.downloadFile(username, filename);
+        FileDownloadResponse resp = fileService.downloadFile(token, filename);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(resp.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resp.getFileName() + "\"")
@@ -61,9 +58,8 @@ public class FileController {
     public ResponseEntity<?> renameFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                         @RequestParam("filename") @NotBlank(message = "filename is required") String oldName,
                                         @RequestBody @Valid RenameFileRequest request) throws IOException {
-        String username = extractUsernameFromToken(token);
         String newName = request.getName();
-        fileService.renameFile(username, oldName, newName);
+        fileService.renameFile(token, oldName, newName);
         return ResponseEntity.ok(Map.of("message", "File renamed successfully"));
 
     }
@@ -71,13 +67,7 @@ public class FileController {
     @GetMapping("/list")
     public ResponseEntity<?> getFileList(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                          @RequestParam("limit") @Min(value = 1, message = "limit must be >= 1") int limit) throws IOException {
-        String username = extractUsernameFromToken(token);
-        List<FileListResponse> list = fileService.getAllFiles(username, limit);
+        List<FileListResponse> list = fileService.getAllFiles(token, limit);
         return ResponseEntity.ok(list);
-    }
-
-    //TODO
-    private String extractUsernameFromToken(String token) {
-        return "user"; // mock logic
     }
 }

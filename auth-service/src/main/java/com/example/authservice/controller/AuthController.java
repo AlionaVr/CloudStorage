@@ -2,6 +2,8 @@ package com.example.authservice.controller;
 
 import com.example.authservice.dto.LoginRequest;
 import com.example.authservice.dto.LoginResponse;
+import com.example.authservice.dto.UserRegistrationRequest;
+import com.example.authservice.entity.Role;
 import com.example.authservice.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,12 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@RequestBody UserRegistrationRequest request) {
+        authService.register(request.getLogin(), request.getPassword(), Role.USER);
         return ResponseEntity.ok().build();
     }
 }

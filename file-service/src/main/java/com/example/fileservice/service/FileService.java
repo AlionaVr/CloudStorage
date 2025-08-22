@@ -5,6 +5,7 @@ import com.example.fileservice.dto.FileListResponse;
 import com.example.fileservice.exception.FileNotFoundException;
 import com.example.fileservice.model.FileDocument;
 import com.example.fileservice.repository.FileRepository;
+import com.example.securitylib.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -22,27 +23,28 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FileService {
 
-    @Value("${spring.servlet.multipart.max-file-size}")
-    private long MAX_FILE_SIZE; //10MB
+    private final JwtService jwtService;
 
     private final FileRepository fileRepository;
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private long MaxFileSize; //10MB
 
-    public void uploadFile(String userName, String fileName, MultipartFile file) throws IOException {
-        Optional<FileDocument> existingFile = fileRepository.findByOwnerName(userName).stream()
-                .filter(f -> f.getFileName().equals(fileName))
-                .findFirst();
+    public void uploadFile(String token, String fileName, MultipartFile file) throws IOException {
+        String username = extractUsernameFromToken(token);
+        Optional<FileDocument> existingFile = fileRepository.findByOwnerNameAndFileName(username, fileName);
 
         if (existingFile.isPresent()) {
             throw new IllegalArgumentException("File already exists");
         }
 
-        if (file.getSize() > MAX_FILE_SIZE) {
+        if (file.getSize() > MaxFileSize) {
             throw new IllegalArgumentException("File too large");
         }
 
         FileDocument doc = FileDocument.builder()
                 .fileName(fileName)
                 .contentType(file.getContentType())
+                .ownerName(username)
                 .size(file.getSize())
                 .uploadDate(LocalDateTime.now())
                 .fileData(file.getBytes())
@@ -51,15 +53,19 @@ public class FileService {
         fileRepository.save(doc);
     }
 
-    public void deleteFile(String userName, String fileName) {
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, fileName)
+    public void deleteFile(String token, String fileName) {
+        String username = extractUsernameFromToken(token);
+
+        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, fileName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + fileName));
 
         fileRepository.delete(fileDoc);
     }
 
-    public FileDownloadResponse downloadFile(String userName, String fileName) throws IOException {
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, fileName)
+    public FileDownloadResponse downloadFile(String token, String fileName) {
+        String username = extractUsernameFromToken(token);
+
+        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, fileName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + fileName));
 
         Resource resource = new ByteArrayResource(fileDoc.getFileData());
@@ -71,11 +77,12 @@ public class FileService {
                 .build();
     }
 
-    public void renameFile(String userName, String oldName, String newName) {
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(userName, oldName)
+    public void renameFile(String token, String oldName, String newName) {
+        String username = extractUsernameFromToken(token);
+        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, oldName)
                 .orElseThrow(() -> new FileNotFoundException("File not found: " + oldName));
 
-        if (fileRepository.findByOwnerNameAndFileName(userName, newName).isPresent()) {
+        if (fileRepository.findByOwnerNameAndFileName(username, newName).isPresent()) {
             throw new IllegalArgumentException("File with name '" + newName + "' already exists");
         }
 
@@ -83,8 +90,10 @@ public class FileService {
         fileRepository.save(fileDoc);
     }
 
-    public List<FileListResponse> getAllFiles(String userName, Integer limit) throws IOException {
-        List<FileDocument> files = fileRepository.findByOwnerName(userName);
+    public List<FileListResponse> getAllFiles(String token, Integer limit) {
+        String username = extractUsernameFromToken(token);
+
+        List<FileDocument> files = fileRepository.findByOwnerName(username);
 
         if (files == null || files.isEmpty()) {
             return Collections.emptyList();
@@ -100,6 +109,10 @@ public class FileService {
                         .contentType(doc.getContentType())
                         .build())
                 .toList();
+    }
+
+    private String extractUsernameFromToken(String token) {
+        return jwtService.getUsername(token);
     }
 }
 
