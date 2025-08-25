@@ -2,6 +2,7 @@ package com.example.securitylib;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,12 +18,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private final MyJwtFilter myJwtFilter;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.info("Initializing Spring Security configuration...");
+
         http.csrf(AbstractHttpConfigurer::disable);
         http.cors(Customizer.withDefaults());
 
@@ -47,6 +51,7 @@ public class SecurityConfig {
         );
 
         http.addFilterBefore(myJwtFilter, UsernamePasswordAuthenticationFilter.class);
+        log.info("Spring Security successfully initialized.");
         return http.build();
     }
 }

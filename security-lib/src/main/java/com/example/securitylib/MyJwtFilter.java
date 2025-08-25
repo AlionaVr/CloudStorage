@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MyJwtFilter extends OncePerRequestFilter {
     @Value("${security.jwt.header}")
     private String header;
@@ -32,8 +34,9 @@ public class MyJwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-
+        log.debug("Processing request to {}", path);
         if (isPublicEndpoint(path)) {
+            log.debug("Public endpoint '{}', skipping authentication", path);
             chain.doFilter(request, response);
             return;
         }
@@ -52,7 +55,9 @@ public class MyJwtFilter extends OncePerRequestFilter {
 
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                log.info("User '{}' authenticated successfully", username);
             } catch (JwtException | IllegalArgumentException e) {
+                log.warn("Invalid or expired JWT token: {}", e.getMessage());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"code\":\"UNAUTHORIZED\",\"message\":\"Invalid or expired token\"}");
