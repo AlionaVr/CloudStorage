@@ -82,6 +82,7 @@ public class MyJwtFilter extends OncePerRequestFilter {
 
     private boolean isPublicEndpoint(String path) {
         return path.equals("/cloud/login") ||
-                path.equals("/cloud/logout");
+                path.equals("/cloud/logout") ||
+                path.equals("/cloud/register");
     }
 }

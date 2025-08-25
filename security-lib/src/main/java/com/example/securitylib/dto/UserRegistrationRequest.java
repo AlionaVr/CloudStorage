@@ -1,4 +1,4 @@
-package com.example.authservice.dto;
+package com.example.securitylib.dto;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

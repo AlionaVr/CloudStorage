@@ -1,9 +1,13 @@
 package com.example.fileservice.controller;
 
+import com.example.fileservice.client.AuthServiceClient;
 import com.example.fileservice.dto.FileDownloadResponse;
 import com.example.fileservice.dto.FileListResponse;
 import com.example.fileservice.dto.request.RenameFileRequest;
 import com.example.fileservice.service.FileService;
+import com.example.securitylib.dto.LoginRequest;
+import com.example.securitylib.dto.LoginResponse;
+import com.example.securitylib.dto.UserRegistrationRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +32,25 @@ import java.util.Map;
 public class FileController {
 
     private final FileService fileService;
+    private final AuthServiceClient authServiceClient;
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.info("Proxying login request for user '{}'", request.getLogin());
+        return authServiceClient.login(request);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@Valid @RequestBody UserRegistrationRequest request) {
+        log.info("Proxying registration request for user '{}'", request.getLogin());
+        return authServiceClient.register(request);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        log.info("Proxying logout request");
+        return authServiceClient.logout();
+    }
 
     @PostMapping(path = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,

@@ -1,10 +1,10 @@
 package com.example.authservice.controller;
 
-import com.example.authservice.dto.LoginRequest;
-import com.example.authservice.dto.LoginResponse;
-import com.example.authservice.dto.UserRegistrationRequest;
 import com.example.authservice.entity.Role;
 import com.example.authservice.service.AuthService;
+import com.example.securitylib.dto.LoginRequest;
+import com.example.securitylib.dto.LoginResponse;
+import com.example.securitylib.dto.UserRegistrationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
