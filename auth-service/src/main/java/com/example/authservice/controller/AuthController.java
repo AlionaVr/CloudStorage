@@ -23,13 +23,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Attempt login for user '{}'", request.getLogin());
 
-        String token = authService.login(request.getLogin(), request.getPassword());
+        LoginResponse response = authService.login(request.getLogin(), request.getPassword());
 
         log.info("Login successful for user '{}'", request.getLogin());
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")

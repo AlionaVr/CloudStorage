@@ -4,6 +4,7 @@ import com.example.authservice.entity.Role;
 import com.example.authservice.entity.User;
 import com.example.authservice.repository.UserRepository;
 import com.example.securitylib.JwtService;
+import com.example.securitylib.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +22,7 @@ public class AuthService {
     private final JwtService jwt;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public String login(String login, String rawPassword) {
+    public LoginResponse login(String login, String rawPassword) {
         log.info("User '{}' is logging in", login);
         User user = userRepository.findByLogin(login)
                 .orElseThrow(() -> {
@@ -33,7 +34,8 @@ public class AuthService {
             log.error("Bad credentials for user '{}'", login);
             throw new IllegalArgumentException("Bad credentials");
         }
-        return jwt.generateAccessToken(user.getLogin(), List.of(user.getRole().name()));
+        String token = jwt.generateAccessToken(user.getLogin(), List.of(user.getRole().name()));
+        return new LoginResponse(token);
     }
 
     public void register(String login, String rawPassword, Role role) {

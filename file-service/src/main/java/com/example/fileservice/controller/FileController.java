@@ -74,7 +74,7 @@ public class FileController {
 
     @GetMapping("/file")
     public ResponseEntity<?> downloadFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
-                                          @RequestParam("filename") @NotBlank(message = "filename is required") String filename) throws IOException {
+                                          @RequestParam("filename") @NotBlank(message = "filename is required") String filename) {
         log.info("Download request: filename='{}'", filename);
         FileDownloadResponse resp = fileService.downloadFile(token, filename);
         log.info("File '{}' successfully downloaded", filename);
@@ -88,8 +88,8 @@ public class FileController {
     @PutMapping("/file")
     public ResponseEntity<?> renameFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                         @RequestParam("filename") @NotBlank(message = "filename is required") String oldName,
-                                        @RequestBody @Valid RenameFileRequest request) throws IOException {
-        String newName = request.getName();
+                                        @RequestBody @Valid RenameFileRequest request) {
+        String newName = request.getFilename();
         log.info("Rename request: filename='{}' to '{}'", oldName, newName);
         fileService.renameFile(token, oldName, newName);
         log.info("File '{}' renamed to '{}'", oldName, newName);
@@ -99,7 +99,7 @@ public class FileController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getFileList(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
-                                         @RequestParam("limit") @Min(value = 1, message = "limit must be >= 1") int limit) throws IOException {
+                                         @RequestParam("limit") @Min(value = 1, message = "limit must be >= 1") int limit) {
         log.info("List request: limit={}", limit);
         List<FileListResponse> list = fileService.getAllFiles(token, limit);
         log.info("Returning {} files", list.size());

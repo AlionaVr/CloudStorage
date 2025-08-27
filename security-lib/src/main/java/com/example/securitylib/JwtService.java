@@ -69,6 +69,7 @@ public class JwtService {
     public Jws<Claims> parse(String token) {
         log.debug("Parsing JWT token...");
         try {
+            if (token.startsWith("Bearer ")) token = token.substring(7);
             Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(key())
                     .requireIssuer(issuer)

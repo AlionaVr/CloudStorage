@@ -45,6 +45,7 @@ services:
       SECURITY_JWT_ISSUER: cloud-storage-diploma
       SECURITY_JWT_ACCESS_TTL_MINUTES: 30
       SECURITY_JWT_HEADER: auth-token
+      AUTH_SERVICE_URL: http://auth-service:8081
     depends_on:
       - mongo
 
