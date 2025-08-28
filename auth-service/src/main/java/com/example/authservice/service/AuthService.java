@@ -2,6 +2,7 @@ package com.example.authservice.service;
 
 import com.example.authservice.entity.Role;
 import com.example.authservice.entity.User;
+import com.example.authservice.exception.UserAlreadyExistsException;
 import com.example.authservice.repository.UserRepository;
 import com.example.securitylib.JwtService;
 import com.example.securitylib.dto.LoginResponse;
@@ -20,7 +21,7 @@ import java.util.List;
 public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwt;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder encoder;
 
     public LoginResponse login(String login, String rawPassword) {
         log.info("User '{}' is logging in", login);
@@ -40,6 +41,12 @@ public class AuthService {
 
     public void register(String login, String rawPassword, Role role) {
         log.info("User '{}' is registering", login);
+
+        if (userRepository.existsByLogin(login)) {
+            log.error("User '{}' already exists", login);
+            throw new UserAlreadyExistsException(login);
+        }
+
         User user = new User();
         user.setLogin(login);
         user.setPasswordHash(encoder.encode(rawPassword));
