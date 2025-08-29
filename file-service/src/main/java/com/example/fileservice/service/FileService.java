@@ -6,7 +6,6 @@ import com.example.fileservice.exception.FileNotFoundException;
 import com.example.fileservice.model.FileDocument;
 import com.example.fileservice.repository.FileRepository;
 import com.example.securitylib.JwtService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -30,32 +28,15 @@ public class FileService {
 
     private final FileRepository fileRepository;
     @Value("${spring.servlet.multipart.max-file-size}")
-    private long MaxFileSize; //10MB
+    private long MaxFileSize;
 
     public void uploadFile(String token, String fileName, MultipartFile file) throws IOException {
         String username = extractUsernameFromToken(token);
         log.info("User '{}' is uploading file '{}'", username, fileName);
 
-        Optional<FileDocument> existingFile = fileRepository.findByOwnerNameAndFileName(username, fileName);
+        validateFileUpload(file, username, fileName);
 
-        if (existingFile.isPresent()) {
-            log.warn("Upload failed: file '{}' already exists for user '{}'", fileName, username);
-            throw new IllegalArgumentException("File already exists");
-        }
-
-        if (file.getSize() > MaxFileSize) {
-            log.warn("Upload failed: file '{}' is too large for user '{}'", fileName, username);
-            throw new IllegalArgumentException("File too large");
-        }
-
-        FileDocument doc = FileDocument.builder()
-                .fileName(fileName)
-                .contentType(file.getContentType())
-                .ownerName(username)
-                .size(file.getSize())
-                .uploadDate(LocalDateTime.now())
-                .fileData(file.getBytes())
-                .build();
+        FileDocument doc = buildFileDocument(fileName, file, username);
 
         fileRepository.save(doc);
         log.info("File '{}' uploaded successfully", fileName);
@@ -65,46 +46,27 @@ public class FileService {
         String username = extractUsernameFromToken(token);
         log.info("User '{}' is deleting file '{}'", username, fileName);
 
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, fileName)
-                .orElseThrow(() -> {
-                    log.warn("Delete failed: file '{}' not found for user '{}'", fileName, username);
-                    return new FileNotFoundException("File not found: " + fileName);
-                });
-
+        FileDocument fileDoc = findFileOrThrow(username, fileName, "Delete");
         fileRepository.delete(fileDoc);
-        log.info("File '{}' deleted successfully", fileName);
 
+        log.info("File '{}' deleted successfully by user '{}'", fileName, username);
     }
 
     public FileDownloadResponse downloadFile(String token, String fileName) {
         String username = extractUsernameFromToken(token);
         log.info("User '{}' is downloading file '{}'", username, fileName);
 
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, fileName)
-                .orElseThrow(() -> {
-                    log.warn("Download failed: file '{}' not found for user '{}'", fileName, username);
-                    return new FileNotFoundException("File not found: " + fileName);
-                });
+        FileDocument fileDoc = findFileOrThrow(username, fileName, "Download");
 
-        log.info("File '{}' successfully downloaded by '{}'", fileName, username);
-        Resource resource = new ByteArrayResource(fileDoc.getFileData());
-        return FileDownloadResponse.builder()
-                .resource(resource)
-                .contentType(fileDoc.getContentType())
-                .fileName(fileDoc.getFileName())
-                .size(fileDoc.getSize())
-                .build();
+        log.info("File '{}' successfully prepared for download by '{}'", fileName, username);
+        return buildDownloadResponse(fileDoc);
     }
 
     public void renameFile(String token, String oldName, String newName) {
         String username = extractUsernameFromToken(token);
         log.info("User '{}' is renaming file '{}' to '{}'", username, oldName, newName);
 
-        FileDocument fileDoc = fileRepository.findByOwnerNameAndFileName(username, oldName)
-                .orElseThrow(() -> {
-                    log.error("Rename failed: file '{}' not found for user '{}'", oldName, username);
-                    return new FileNotFoundException("File not found: " + oldName);
-                });
+        FileDocument fileDoc = findFileOrThrow(username, oldName, "Rename");
 
         if (fileRepository.findByOwnerNameAndFileName(username, newName).isPresent()) {
             log.warn("Rename failed: file '{}' already exists for user '{}'", newName, username);
@@ -145,5 +107,46 @@ public class FileService {
     private String extractUsernameFromToken(String token) {
         return jwtService.getUsername(token);
     }
-}
 
+    private void validateFileUpload(MultipartFile file, String username, String fileName) {
+
+        if (fileRepository.findByOwnerNameAndFileName(username, fileName).isPresent()) {
+            log.warn("Upload failed: file '{}' already exists for user '{}'", fileName, username);
+            throw new IllegalArgumentException("File already exists");
+        }
+
+        if (file.getSize() > MaxFileSize) {
+            log.warn("Upload failed: file '{}' is too large for user '{}'", fileName, username);
+            throw new IllegalArgumentException("File too large");
+        }
+    }
+
+    private FileDocument buildFileDocument(String fileName, MultipartFile file, String username) throws IOException {
+        return FileDocument.builder()
+                .fileName(fileName)
+                .contentType(file.getContentType())
+                .ownerName(username)
+                .size(file.getSize())
+                .uploadDate(LocalDateTime.now())
+                .fileData(file.getBytes())
+                .build();
+    }
+
+    private FileDocument findFileOrThrow(String username, String fileName, String operation) {
+        return fileRepository.findByOwnerNameAndFileName(username, fileName)
+                .orElseThrow(() -> {
+                    log.warn("{} failed: file '{}' not found for user '{}'", operation, fileName, username);
+                    return new FileNotFoundException("File not found: " + fileName);
+                });
+    }
+
+    private FileDownloadResponse buildDownloadResponse(FileDocument fileDoc) {
+        Resource resource = new ByteArrayResource(fileDoc.getFileData());
+        return FileDownloadResponse.builder()
+                .resource(resource)
+                .contentType(fileDoc.getContentType())
+                .fileName(fileDoc.getFileName())
+                .size(fileDoc.getSize())
+                .build();
+    }
+}
