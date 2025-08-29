@@ -6,6 +6,7 @@ import com.example.fileservice.exception.FileNotFoundException;
 import com.example.fileservice.model.FileDocument;
 import com.example.fileservice.repository.FileRepository;
 import com.example.securitylib.JwtService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

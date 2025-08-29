@@ -30,7 +30,6 @@ public class AuthServiceTests {
 
     private final String TEST_LOGIN = "testuser";
     private final String TEST_PASSWORD = "password123";
-    private final String TEST_ENCODED_PASSWORD = "$2a$10$encoded.password.hash";
     private final String TEST_TOKEN = "jwt.test.token";
     @Mock
     private UserRepository userRepository;

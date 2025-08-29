@@ -13,5 +13,4 @@ public interface FileRepository extends MongoRepository<FileDocument, String> {
 
     Optional<FileDocument> findByOwnerNameAndFileName(String username, String fileName);
 
-    Optional<FileDocument> findByFileName(String name);
 }
