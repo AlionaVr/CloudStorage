@@ -89,7 +89,7 @@ public class FileController {
     public ResponseEntity<?> renameFile(@RequestHeader("auth-token") @NotBlank(message = "auth-token is required") String token,
                                         @RequestParam("filename") @NotBlank(message = "filename is required") String oldName,
                                         @RequestBody @Valid RenameFileRequest request) {
-        String newName = request.getFilename();
+        String newName = request.getNewFilename();
         log.info("Rename request: filename='{}' to '{}'", oldName, newName);
         fileService.renameFile(token, oldName, newName);
         log.info("File '{}' renamed to '{}'", oldName, newName);
