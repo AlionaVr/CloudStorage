@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RenameFileRequest {
     @NotBlank(message = "name must not be blank")
-    private String newFilename;
+    private String filename;
 }

@@ -25,7 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class FileControllerTests {
+public class FileControllerTests {
 
     private static final String TEST_TOKEN = "test-jwt-token";
     private static final String TEST_FILENAME = "test.txt";
@@ -145,7 +145,7 @@ class FileControllerTests {
     void renameFile_whenValidRequest_shouldReturnSuccessResponse() {
         // given
         RenameFileRequest request = new RenameFileRequest();
-        request.setNewFilename(NEW_FILENAME);
+        request.setFilename(NEW_FILENAME);
         doNothing().when(fileService).renameFile(TEST_TOKEN, TEST_FILENAME, NEW_FILENAME);
 
         // when
@@ -165,7 +165,7 @@ class FileControllerTests {
     void renameFile_whenNewNameAlreadyExists_shouldPropagateException() {
         // given
         RenameFileRequest request = new RenameFileRequest();
-        request.setNewFilename(NEW_FILENAME);
+        request.setFilename(NEW_FILENAME);
         doThrow(new IllegalArgumentException("File with name '" + NEW_FILENAME + "' already exists"))
                 .when(fileService).renameFile(TEST_TOKEN, TEST_FILENAME, NEW_FILENAME);
 
